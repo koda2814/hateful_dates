@@ -1,4 +1,3 @@
-from multiprocessing import connection
 import vk_api
 import psycopg2
 from config import host, user, password, db_name
@@ -7,26 +6,26 @@ from config import host, user, password, db_name
 
 
 
-try:
-	conn = psycopg2.connect(
-		host=host,
-		user = user,
-		password = password,
-		database = db_name,
-	)
+# try:
+# 	conn = psycopg2.connect(
+# 		host=host,
+# 		user = user,
+# 		password = password,
+# 		database = db_name,
+# 	)
 
-	conn.autocommit = True
+# 	conn.autocommit = True
 
-	with conn.cursor() as cursor:
-		cursor.execute(
-			"SELECT * FROM users;"
-		)
-		print(f'SERVER VERSION: {cursor.fetchone()}' )
+	# with conn.cursor() as cursor:
+	# 	cursor.execute(
+	# 		"SELECT * FROM users;"
+	# 	)
+	# 	print(f'SERVER VERSION: {cursor.fetchone()}' )
 
 	# with conn.cursor() as cursor:
 	# 	cursor.execute(
 	# 		"""INSERT INTO users (id, name, gender, age, 
-	# 		city, orientation, description, photo_link) VALUES
+	# 		city, looking_for, description, photo_link) VALUES
 	# 		(1337, 'Артем', 'муж', '19', 
 	# 		'Владивосток', 'гетеро', 'Я наруто узумаки!', 'photo_13123632_3234521'); """
 	# 	)
@@ -39,20 +38,20 @@ try:
 	# 		gender VARCHAR(6),
 	# 		age INT,
 	# 		city VARCHAR(30),
-	# 		orientation VARCHAR(6),
+	# 		looking_for VARCHAR(6),
 	# 		description VARCHAR(500),
 	# 		photo_link VARCHAR(50)
 	# 		);"""
 	# 	)
 	# print('done')
 
-except psycopg2.Error as e:
-	print(f'PSQL ERROR WHILE CONNECT')
-	print(e)
-finally:
-	if conn:
-		conn.close()
-		print('PSQL CONNECTION CLOSED')
+# except psycopg2.Error as e:
+# 	print(f'PSQL ERROR WHILE CONNECT')
+# 	print(e)
+# finally:
+# 	if conn:
+# 		conn.close()
+# 		# print('PSQL CONNECTION CLOSED')
 
 class DataBase:
 	"""Класс для работы с БД"""
@@ -84,29 +83,52 @@ class DataBase:
 		if self.connection:
 			self.connection.close()
 
-	def insert_user_info(self, data):
+	def insert_user_info(self, data, table_name):
 		"""Вставляет в БД словарь с данными о пользователе
-			[id, name, gender, age, city, orientation, description, photo_link]"""
+			[id, name, gender, age, city, looking_for, description, photo_link]"""
 		with self.connection.cursor() as cursor:
 			cursor.execute(
-				f"""INSERT INTO users (id, name, gender, age, 
-				city, orientation, description, photo_link) VALUES
+				f"""INSERT INTO {table_name} (id, name, gender, age, 
+				city, looking_for, description, photo_link) VALUES
 				({data['id']}, '{data['name']}', '{data['gender']}', '{data['age']}', '{data['city']}', 
-				'{data['orientation']}', '{data['description']}', '{data['photo_link']}'); """
+				'{data['looking_for']}', '{data['description']}', '{data['photo_link']}'); """
 			)
 	
-	def get_users(self):
-		"""Возвращает список пользователей из БД по фильтру"""
+	def get_users(self, data, table):
+		"""Возвращает список пользователей из БД по фильтру из data"""
 		"""Бля чуваки ебать я щас накуренный время 20:53 и я попробую чуток покодить хотя мне 
 		наверное скоро станет похуй ))"""
 		with self.connection.cursor() as cursor:
 			cursor.execute(
-				f""" """
+				f"""SELECT * FROM {table} WHERE city={data['city']} AND gender={data['looking_for']} LIMIT 10"""
 			)
+			return cursor.fetchone()
+
+	def get_version(self):
+		"""Возвращает версию сервера psql в формате строки"""
+		with self.connection.cursor() as cursor: 		#TODO: Оберни через декораторы
+			cursor.execute(
+				f"""SELECT version(); """
+			)
+			return str(cursor.fetchone())
 
 
+#тещу как работает класс, не вызывают метод Get_users()
 
-db1 = DataBase('root', '1234', 8080, 'bot_users')
+data = {'id': 5214, 'name': 'Dima', 'age': 18, 'city': 'vladivostok',  	#TODO: НЕ ПРИНИМАЕТ АЙДИ ВЫШЕ ОПРЕДЛЕННОГО ЗНАЧЕНИЯ
+		'gender': 'man', 'looking_for': 'woman', 'description': 'hello world',
+		'photo_link': 'photo_1434234_432432'}
+
+db = DataBase(host, user, password, db_name)
+
+db.to_connect()
+print(db.get_version())
+
+db.insert_user_info(data, 'users')
+db.close_connection()
+
+
+# db1 = DataBase('root', '1234', 8080, 'bot_users')
 
 # db1.print_info()
 # db2.print_info()
