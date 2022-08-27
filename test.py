@@ -5,6 +5,8 @@ from config import host, user, password, db_name
 
 
 
+
+
 try:
 	conn = psycopg2.connect(
 		host=host,
@@ -17,24 +19,32 @@ try:
 
 	with conn.cursor() as cursor:
 		cursor.execute(
-			"SELECT version();"
+			"SELECT * FROM users;"
 		)
 		print(f'SERVER VERSION: {cursor.fetchone()}' )
 
-	with conn.cursor() as cursor:
-		cursor.execute(
-			"""CREATE TABLE users(
-			id INT,
-			name VARCHAR(15),
-			gender VARCHAR(6),
-			age INT,
-			city VARCHAR(30),
-			orientation VARCHAR(6),
-			description VARCHAR(500),
-			photo_link VARCHAR(50)
-			);"""
-		)
-	print('done')
+	# with conn.cursor() as cursor:
+	# 	cursor.execute(
+	# 		"""INSERT INTO users (id, name, gender, age, 
+	# 		city, orientation, description, photo_link) VALUES
+	# 		(1337, 'Артем', 'муж', '19', 
+	# 		'Владивосток', 'гетеро', 'Я наруто узумаки!', 'photo_13123632_3234521'); """
+	# 	)
+
+	# with conn.cursor() as cursor:
+	# 	cursor.execute(
+	# 		"""CREATE TABLE users(
+	# 		id INT,
+	# 		name VARCHAR(15),
+	# 		gender VARCHAR(6),
+	# 		age INT,
+	# 		city VARCHAR(30),
+	# 		orientation VARCHAR(6),
+	# 		description VARCHAR(500),
+	# 		photo_link VARCHAR(50)
+	# 		);"""
+	# 	)
+	# print('done')
 
 except psycopg2.Error as e:
 	print(f'PSQL ERROR WHILE CONNECT')
@@ -73,6 +83,28 @@ class DataBase:
 	def close_connection(self):
 		if self.connection:
 			self.connection.close()
+
+	def insert_user_info(self, data):
+		"""Вставляет в БД словарь с данными о пользователе
+			[id, name, gender, age, city, orientation, description, photo_link]"""
+		with self.connection.cursor() as cursor:
+			cursor.execute(
+				f"""INSERT INTO users (id, name, gender, age, 
+				city, orientation, description, photo_link) VALUES
+				({data['id']}, '{data['name']}', '{data['gender']}', '{data['age']}', '{data['city']}', 
+				'{data['orientation']}', '{data['description']}', '{data['photo_link']}'); """
+			)
+	
+	def get_users(self):
+		"""Возвращает список пользователей из БД по фильтру"""
+		"""Бля чуваки ебать я щас накуренный время 20:53 и я попробую чуток покодить хотя мне 
+		наверное скоро станет похуй ))"""
+		with self.connection.cursor() as cursor:
+			cursor.execute(
+				f""" """
+			)
+
+
 
 db1 = DataBase('root', '1234', 8080, 'bot_users')
 
