@@ -20,6 +20,8 @@ class DataBase:
 
 db1 = DataBase('root', '1234', 8080)
 db2 = DataBase('toor', '5678', 8080)
+print('hi')
+print('hello dude')
 
 
 print(id(db1), id(db2))
